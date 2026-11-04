@@ -6,7 +6,7 @@ Version 0.1.0
 
 A small macOS menu bar app: you decide which app goes on which display. As soon as monitors are connected (including via DisplayLink docks), it moves the windows there automatically.
 
-Requires macOS 15 or later. The UI is currently in German; menu labels below are quoted as they appear in the app, with a translation in brackets.
+Requires macOS 15 or later.
 
 ## Download
 
@@ -33,10 +33,10 @@ On first launch macOS asks for **Accessibility** access (System Settings → Pri
 ## Usage
 
 1. Arrange your windows the way you want them.
-2. Menu bar → **Aktuelle Anordnung speichern → Als neues Layout…** [Save current arrangement → As new layout…] → enter a name (e.g. "Office", "Meeting").
+2. Menu bar → **Save Current Arrangement → As New Layout…** → enter a name (e.g. "Office", "Meeting").
 3. Repeat for other setups. Each layout remembers, per app, the display and the exact window position.
-4. In **Einstellungen…** [Settings…], give your displays names (**Identifizieren** [Identify] shows which one is which) and adjust the placement per app: saved position, keep position, maximize, left/right half, center.
-5. Turn on **Beim Anmelden starten** [Launch at login].
+4. In **Settings…**, give your displays names (**Identify** shows which one is which) and adjust the placement per app: saved position, keep position, maximize, left/right half, center.
+5. Turn on **Launch at login**.
 
 To apply a layout, click it in the menu bar or press **⌃⌥⌘1 … 9** (in the order shown in Settings). The most recently applied layout is the *active* one. It is applied automatically when displays are connected, the Mac wakes up, or an app launches. **⌃⌥⌘W** applies it again.
 
@@ -45,7 +45,7 @@ To apply a layout, click it in the menu bar or press **⌃⌥⌘1 … 9** (in th
 Every window is saved separately, with its own display and position, and shows up as its own row below the app in Settings. When a layout is applied, each window is recognized by:
 
 1. its macOS **window number**. It stays the same as long as the window is open, including when you undock and redock.
-2. **„Titel enthält …“** [Title contains …], if you filled it in (e.g. "sellerboard"). Useful after restarting the browser, because window numbers change then.
+2. **Title contains…**, if you filled it in (e.g. "sellerboard"). Useful after restarting the browser, because window numbers change then.
 3. the **same title** as when the layout was saved.
 4. otherwise, the **window order**.
 
@@ -53,7 +53,7 @@ When a window is found through 2–4, the app remembers its new number. Extra wi
 
 ### Updating a layout
 
-Saving under the name of an existing layout (or choosing **In „…“ übernehmen** [Apply to "…"]) overwrites it: for every open app, displays, window positions and placement ("saved position") are replaced. Only on/off and the "Title contains" filters are kept. Apps that aren't running stay in the layout.
+Saving under the name of an existing layout (or choosing **Save Current Arrangement → Into “…”**) overwrites it: for every open app, displays, window positions and placement ("saved position") are replaced. Only on/off and the "Title contains" filters are kept. Apps that aren't running stay in the layout.
 
 ### Apps that aren't running
 

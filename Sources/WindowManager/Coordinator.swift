@@ -12,7 +12,7 @@ final class Coordinator: ObservableObject {
     static let digitKeyCodes: [UInt32] = [18, 19, 20, 21, 23, 22, 26, 28, 25]
 
     @Published private(set) var connectedKeys: Set<String> = []
-    @Published private(set) var status = "Bereit"
+    @Published private(set) var status = "Ready"
     @Published private(set) var isTrusted = WindowMover.isTrusted
 
     private let store = Store.shared
@@ -69,7 +69,7 @@ final class Coordinator: ObservableObject {
         let work = DispatchWorkItem { [weak self] in
             MainActor.assumeIsolated {
                 self?.refreshScreens()
-                self?.applyNow(reason: "Bildschirmänderung")
+                self?.applyNow(reason: "display change")
             }
         }
         pending = work
@@ -114,19 +114,19 @@ final class Coordinator: ObservableObject {
     func applyNow(reason: String? = nil) {
         isTrusted = WindowMover.isTrusted
         guard isTrusted else {
-            status = "Keine Bedienungshilfen-Berechtigung"
+            status = "No Accessibility permission"
             WindowMover.requestTrust()
             return
         }
         guard let layout = store.activeLayout else {
-            status = "Noch kein Layout gespeichert"
+            status = "No layout saved yet"
             return
         }
         let result = WindowMover.apply(rules: layout.rules)
         store.learnWindowIDs(result.learnedIDs, in: layout.id)
         let moved = result.moved
         let time = Date().formatted(date: .omitted, time: .shortened)
-        status = "„\(layout.name)“ \(time)\(reason.map { " (\($0))" } ?? ""): \(moved) Fenster verschoben"
+        status = "“\(layout.name)” \(time)\(reason.map { " (\($0))" } ?? ""): moved \(moved) \(moved == 1 ? "window" : "windows")"
         log.info("Applied \(layout.name, privacy: .public): moved \(moved) windows")
     }
 
@@ -135,7 +135,7 @@ final class Coordinator: ObservableObject {
     /// A rule for every regular app with a visible window, based on where it is right now.
     private func captureRules() -> [Rule]? {
         guard WindowMover.isTrusted else {
-            status = "Keine Bedienungshilfen-Berechtigung"
+            status = "No Accessibility permission"
             WindowMover.requestTrust()
             return nil
         }
@@ -161,14 +161,14 @@ final class Coordinator: ObservableObject {
 
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "Aktuelle Anordnung speichern"
-        alert.informativeText = "\(rules.count) Apps mit offenen Fenstern werden gespeichert. Wie soll das Layout heißen?"
+        alert.messageText = "Save Current Arrangement"
+        alert.informativeText = "\(rules.count) apps with open windows will be saved. What should the layout be called?"
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 280, height: 24))
-        field.placeholderString = "z. B. Büro, Meeting, Homeoffice"
+        field.placeholderString = "e.g. Office, Meeting, Home"
         field.stringValue = "Layout \(store.layouts.count + 1)"
         alert.accessoryView = field
-        alert.addButton(withTitle: "Speichern")
-        alert.addButton(withTitle: "Abbrechen")
+        alert.addButton(withTitle: "Save")
+        alert.addButton(withTitle: "Cancel")
         alert.window.initialFirstResponder = field
         guard alert.runModal() == .alertFirstButtonReturn else { return nil }
 
@@ -179,10 +179,10 @@ final class Coordinator: ObservableObject {
         if let existing = store.layouts.first(where: { $0.name.caseInsensitiveCompare(name) == .orderedSame }) {
             store.merge(rules, into: existing.id)
             id = existing.id
-            status = "„\(existing.name)“ aktualisiert: \(rules.count) Apps"
+            status = "“\(existing.name)” updated: \(rules.count) apps"
         } else {
             id = store.addLayout(name: name, rules: rules)
-            status = "„\(name)“ gespeichert: \(rules.count) Apps"
+            status = "“\(name)” saved: \(rules.count) apps"
         }
         store.activeLayoutID = id
         return id
@@ -193,7 +193,7 @@ final class Coordinator: ObservableObject {
         guard let layout = store.layout(layoutID), let rules = captureRules() else { return }
         store.merge(rules, into: layoutID)
         store.activeLayoutID = layoutID
-        status = "„\(layout.name)“ aktualisiert: \(rules.count) Apps"
+        status = "“\(layout.name)” updated: \(rules.count) apps"
     }
 
     // MARK: - Misc
@@ -208,7 +208,7 @@ final class Coordinator: ObservableObject {
             do {
                 if newValue { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
             } catch {
-                status = "Autostart fehlgeschlagen: \(error.localizedDescription)"
+                status = "Launch at login failed: \(error.localizedDescription)"
             }
             objectWillChange.send()
         }

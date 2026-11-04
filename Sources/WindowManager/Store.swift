@@ -5,12 +5,12 @@ enum Placement: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .saved: "Gespeicherte Position"
-        case .keepRelative: "Position beibehalten"
-        case .maximize: "Maximieren"
-        case .leftHalf: "Linke Hälfte"
-        case .rightHalf: "Rechte Hälfte"
-        case .center: "Zentrieren"
+        case .saved: "Saved Position"
+        case .keepRelative: "Keep Position"
+        case .maximize: "Maximize"
+        case .leftHalf: "Left Half"
+        case .rightHalf: "Right Half"
+        case .center: "Center"
         }
     }
 }
@@ -135,7 +135,7 @@ final class Store: ObservableObject {
             layouts = saved
         } else if let oldRules: [Rule] = Self.load("rules"), !oldRules.isEmpty {
             // Version 1 had a single, unnamed rule list.
-            layouts = [Layout(name: "Standard", rules: oldRules)]
+            layouts = [Layout(name: "Default", rules: oldRules)]
             migrated = true
         } else {
             layouts = []
@@ -159,7 +159,7 @@ final class Store: ObservableObject {
     func layout(_ id: UUID) -> Layout? { layouts.first { $0.id == id } }
 
     func displayName(_ key: String) -> String {
-        displays.first { $0.key == key }?.name ?? "Unbekannter Bildschirm"
+        displays.first { $0.key == key }?.name ?? "Unknown Display"
     }
 
     func register(_ screens: [ScreenRef]) {
@@ -185,7 +185,7 @@ final class Store: ObservableObject {
         guard let i = layouts.firstIndex(where: { $0.id == id }) else { return }
         var copy = layouts[i]
         copy.id = UUID()
-        copy.name += " Kopie"
+        copy.name += " Copy"
         copy.rules = copy.rules.map { var r = $0; r.id = UUID(); return r }
         layouts.insert(copy, at: i + 1)
     }

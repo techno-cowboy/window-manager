@@ -32,13 +32,13 @@ private struct MenuContent: View {
 
     var body: some View {
         if !coordinator.isTrusted {
-            Button("⚠︎ Bedienungshilfen-Zugriff erlauben…") { openAccessibilitySettings() }
+            Button("⚠︎ Allow Accessibility Access…") { openAccessibilitySettings() }
             Divider()
         }
 
         Section("Layouts") {
             if store.layouts.isEmpty {
-                Text("Noch keine Layouts gespeichert")
+                Text("No layouts saved yet")
             }
             ForEach(Array(store.layouts.enumerated()), id: \.element.id) { i, layout in
                 let item = Toggle(layout.name, isOn: Binding(
@@ -54,28 +54,28 @@ private struct MenuContent: View {
         }
 
         Divider()
-        Menu("Aktuelle Anordnung speichern") {
-            Button("Als neues Layout…") { coordinator.promptSaveNewLayout() }
+        Menu("Save Current Arrangement") {
+            Button("As New Layout…") { coordinator.promptSaveNewLayout() }
             if !store.layouts.isEmpty {
                 Divider()
                 ForEach(store.layouts) { layout in
-                    Button("In „\(layout.name)“ übernehmen") { coordinator.captureInto(layoutID: layout.id) }
+                    Button("Into “\(layout.name)”") { coordinator.captureInto(layoutID: layout.id) }
                 }
             }
         }
-        Button("Aktives Layout erneut anwenden") { coordinator.applyNow() }
+        Button("Reapply Active Layout") { coordinator.applyNow() }
             .keyboardShortcut("w", modifiers: layoutShortcutModifiers)
             .disabled(store.layouts.isEmpty)
-        Button("Bildschirme identifizieren") { coordinator.identifyScreens() }
+        Button("Identify Displays") { coordinator.identifyScreens() }
         Divider()
         Text(coordinator.status)
         Divider()
-        Button("Einstellungen…") {
+        Button("Settings…") {
             openWindow(id: "settings")
             NSApp.activate()
         }
         .keyboardShortcut(",")
-        Button("Beenden") { NSApp.terminate(nil) }
+        Button("Quit") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
     }
 }

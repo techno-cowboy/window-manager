@@ -62,7 +62,7 @@ enum Screens {
             if seen[key]! > 1 { key += "#\(seen[key]!)" }
 
             return ScreenRef(key: key,
-                             systemName: r.builtin ? "MacBook (intern)" : r.screen.localizedName,
+                             systemName: r.builtin ? "MacBook (built-in)" : r.screen.localizedName,
                              displayID: r.id,
                              frame: flip(r.screen.frame),
                              visibleFrame: flip(r.screen.visibleFrame),
