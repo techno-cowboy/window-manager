@@ -2,7 +2,7 @@
 
 # Window Manager
 
-Version 0.1.0
+Version 0.2.0
 
 A small macOS menu bar app: you decide which app goes on which display. As soon as monitors are connected (including via DisplayLink docks), it moves the windows there automatically.
 
