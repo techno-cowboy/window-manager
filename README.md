@@ -4,49 +4,67 @@
 
 Version 0.1.0
 
-Kleine Menüleisten-App für macOS: Du legst fest, welche App auf welchem Bildschirm landet. Sobald Monitore (auch über DisplayLink) angesteckt werden, schiebt sie die Fenster automatisch dorthin.
+A small macOS menu bar app: you decide which app goes on which display. As soon as monitors are connected (including via DisplayLink docks), it moves the windows there automatically.
 
-## Bauen & installieren
+Requires macOS 15 or later. The UI is currently in German; menu labels below are quoted as they appear in the app, with a translation in brackets.
+
+## Download
+
+Grab the latest `Window-Manager-*.zip` from [Releases](https://github.com/techno-cowboy/window-manager/releases), unzip it and move **Window Manager.app** to `/Applications`.
+
+The app is not notarized, so macOS blocks it on first launch. Either right-click it → **Open**, or remove the quarantine flag:
 
 ```sh
-./build.sh install     # baut, kopiert nach /Applications und startet
-swift test             # Unit-Tests (Fenster-Zuordnung, Datenformat)
+xattr -dr com.apple.quarantine "/Applications/Window Manager.app"
 ```
 
-Beim ersten Start fragt macOS nach dem **Bedienungshilfen-Zugriff** (Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen). Den braucht die App zum Verschieben der Fenster.
+## Build & install
 
-> Ohne Entwickler-Zertifikat wird ad-hoc signiert, dann fragt macOS nach jedem Neubau wieder nach der Berechtigung. Mit einem festen Zertifikat ist das weg:
-> `CODESIGN_IDENTITY="Apple Development: Dein Name (XXXX)" ./build.sh install`
+```sh
+./build.sh install     # builds, copies to /Applications and launches
+swift test             # unit tests (window matching, data format)
+```
 
-## Benutzung
+On first launch macOS asks for **Accessibility** access (System Settings → Privacy & Security → Accessibility). The app needs it to move windows.
 
-1. Fenster so anordnen, wie du sie haben willst.
-2. Menüleiste → **Aktuelle Anordnung speichern → Als neues Layout…** → Namen eingeben (z. B. „Büro“, „Meeting“).
-3. Für weitere Situationen wiederholen. Jedes Layout merkt sich pro App den Bildschirm und die genaue Fensterposition.
-4. In **Einstellungen…** den Bildschirmen Namen geben (**Identifizieren** zeigt, welcher welcher ist) und pro App die Platzierung anpassen (gespeicherte Position, Position beibehalten, Maximieren, linke/rechte Hälfte, Zentrieren).
-5. **Beim Anmelden starten** einschalten.
+> Without a developer certificate the app is signed ad hoc, so macOS asks for the permission again after every rebuild. A stable certificate avoids that:
+> `CODESIGN_IDENTITY="Apple Development: Your Name (XXXX)" ./build.sh install`
 
-Layout anwenden: in der Menüleiste anklicken oder **⌃⌥⌘1 … 9** (Reihenfolge wie in den Einstellungen). Das zuletzt angewendete Layout ist das *aktive*. Es wird automatisch angewendet, wenn Bildschirme angesteckt werden, der Mac aufwacht oder eine App startet. **⌃⌥⌘W** wendet es erneut an.
+## Usage
 
-### Mehrere Fenster einer App (z. B. zwei Browserfenster)
+1. Arrange your windows the way you want them.
+2. Menu bar → **Aktuelle Anordnung speichern → Als neues Layout…** [Save current arrangement → As new layout…] → enter a name (e.g. "Office", "Meeting").
+3. Repeat for other setups. Each layout remembers, per app, the display and the exact window position.
+4. In **Einstellungen…** [Settings…], give your displays names (**Identifizieren** [Identify] shows which one is which) and adjust the placement per app: saved position, keep position, maximize, left/right half, center.
+5. Turn on **Beim Anmelden starten** [Launch at login].
 
-Jedes Fenster wird einzeln gespeichert, mit eigenem Bildschirm und eigener Position. In den Einstellungen erscheint es als eigene Zeile unter der App. Beim Anwenden wird jedes Fenster so wiedererkannt:
+To apply a layout, click it in the menu bar or press **⌃⌥⌘1 … 9** (in the order shown in Settings). The most recently applied layout is the *active* one. It is applied automatically when displays are connected, the Mac wakes up, or an app launches. **⌃⌥⌘W** applies it again.
 
-1. über die **Fensternummer** von macOS. Die bleibt gleich, solange das Fenster offen ist, also auch beim Ab- und Anstecken am Dock.
-2. über **„Titel enthält …“**, falls du das ausgefüllt hast (z. B. „sellerboard“). Nützlich nach einem Neustart des Browsers, weil die Fensternummern dann neu sind.
-3. über den **gleichen Titel** wie beim Speichern.
-4. sonst über die **Reihenfolge**.
+### Multiple windows of one app (e.g. two browser windows)
 
-Wird ein Fenster über 2–4 gefunden, merkt sich die App seine neue Nummer. Zusätzliche Fenster, die nicht im Layout sind, kommen auf den Hauptbildschirm der App.
+Every window is saved separately, with its own display and position, and shows up as its own row below the app in Settings. When a layout is applied, each window is recognized by:
 
-Wird beim Speichern der Name eines vorhandenen Layouts eingegeben (oder **„In „…“ übernehmen“** gewählt), wird dieses überschrieben: Für jede offene App werden Bildschirme, Fensterpositionen und Platzierung („Gespeicherte Position“) neu gesetzt. Erhalten bleiben nur Ein/Aus und die „Titel enthält …“-Filter. Apps, die gerade nicht laufen, bleiben im Layout.
+1. its macOS **window number**. It stays the same as long as the window is open, including when you undock and redock.
+2. **„Titel enthält …“** [Title contains …], if you filled it in (e.g. "sellerboard"). Useful after restarting the browser, because window numbers change then.
+3. the **same title** as when the layout was saved.
+4. otherwise, the **window order**.
 
-## Wie es funktioniert
+When a window is found through 2–4, the app remembers its new number. Extra windows that aren't part of the layout go to the app's main display.
 
-- Bildschirme werden über **Hersteller-, Modell- und Seriennummer** erkannt, nicht über die Display-ID, die DisplayLink bei jedem Anstecken neu vergibt. So bleiben drei gleiche Monitore unterscheidbar.
-- Nach einer Bildschirmänderung wartet die App eine einstellbare Zeit (Standard 3 s), weil DisplayLink-Monitore schrittweise hochkommen und macOS danach selbst noch Fenster verschiebt.
-- Verschoben wird über die Accessibility-API (`AXUIElement`). Die Fensternummer kommt aus der privaten, aber seit Jahren stabilen Funktion `_AXUIElementGetWindow`, die auch Rectangle, yabai & Co. nutzen. Minimierte Fenster, Fenster im Vollbildmodus und Fenster auf anderen Spaces werden ignoriert.
+### Updating a layout
 
-## Lizenz
+Saving under the name of an existing layout (or choosing **In „…“ übernehmen** [Apply to "…"]) overwrites it: for every open app, displays, window positions and placement ("saved position") are replaced. Only on/off and the "Title contains" filters are kept. Apps that aren't running stay in the layout.
+
+### Apps that aren't running
+
+Apps that aren't running are skipped when a layout is applied; Window Manager doesn't launch them. If such an app is started later and auto-apply is on, the active layout is applied to it 1, 3 and 6 seconds after launch.
+
+## How it works
+
+- Displays are identified by **vendor, model and serial number**, not by the display ID, which DisplayLink assigns anew on every reconnect. That keeps three identical monitors apart.
+- After a display change the app waits for a configurable delay (default 3 s), because DisplayLink monitors come up step by step and macOS moves windows around on its own afterwards.
+- Windows are moved through the Accessibility API (`AXUIElement`). The window number comes from the private but long-stable function `_AXUIElementGetWindow`, which Rectangle, yabai and others use as well. Minimized windows, full-screen windows and windows on other Spaces are ignored.
+
+## License
 
 [MIT](LICENSE) © 2026 Nils Rosemann
